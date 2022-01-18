@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { addNewPost } from './postsSlice'
 
+import { Spinner } from '../../components/Spinner'
+
 export const AddPostForm = () => {
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
@@ -17,21 +19,16 @@ export const AddPostForm = () => {
     const onContentChanged = e => setContent(e.target.value)
     const onAuthorChanged = e => setUserId(e.target.value)
 
-    // const onSavePostClicked = () => {
-    //     if (title && content) {
-    //         dispatch(postAdded(title, content, userId))
-    //         setTitle('')
-    //         setContent('')
-    //     }
-    // }
-
     const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
-    // Boolean(title) && Boolean(content) && Boolean(userId)
 
     const onSavePostClicked = async () => {
         if (canSave) {
             try {
                 setAddRequestStatus('pending')
+                // Redux Toolkit adds a .unwrap() function to the returned Promise, which will return 
+                // a new Promise that either has the actual action.payload value from a fulfilled action, 
+                // or throws an error if it's the rejected action(helps handle request at the component
+                // level)
                 await dispatch(addNewPost({ title, content, user: userId })).unwrap()
                 setTitle('')
                 setContent('')
@@ -75,6 +72,7 @@ export const AddPostForm = () => {
                     onChange={onContentChanged}
                 />
                 <button type="button" onClick={onSavePostClicked} disabled={!canSave}>Save Post</button>
+                {addRequestStatus === 'pending' ? <Spinner /> : null}
             </form>
         </section>
     )
