@@ -6,15 +6,15 @@ import { Spinner } from '../../components/Spinner'
 import { PostAuthor } from './PostAuthor'
 import { TimeAgo } from './TimeAgo'
 import { ReactionButtons } from './ReactionButtons'
-import { 
-    selectAllPosts,
-    fetchPosts,
-    selectPostIds,
-    selectPostById
-} from './postsSlice'
+// import { 
+//     fetchPosts,
+//     selectPostIds,
+//     selectPostById
+// } from './postsSlice'
+import { useGetPostsQuery } from '../api/apiSlice'
 
-const PostExcerpt = ({ postId }) => {
-    const post = useSelector(state => selectPostById(state, postId))
+let PostExcerpt = ({ post }) => {
+    // const post = useSelector(state => selectPostById(state, postId))
 
     return (
         <article className="post-excerpt" key={post.id}>
@@ -34,28 +34,34 @@ const PostExcerpt = ({ postId }) => {
 }
 
 export const PostsList = () => {
-    const dispatch = useDispatch()
-    const orderedPostIds = useSelector(selectPostIds)
+    const {
+        data: posts,
+        isLoading,
+        isSuccess,
+        isError,
+        error
+    } = useGetPostsQuery()
 
-    const postStatus = useSelector(state => state.posts.status)
-    const error = useSelector(state => state.posts.error)
+    // const dispatch = useDispatch()
+    // const orderedPostIds = useSelector(selectPostIds)
 
-    useEffect(() => {
-        if (postStatus === 'idle') {
-            dispatch(fetchPosts())
-        }
-    }, [postStatus, dispatch])
+    // const postStatus = useSelector(state => state.posts.status)
+    // const error = useSelector(state => state.posts.error)
+
+    // useEffect(() => {
+    //     if (postStatus === 'idle') {
+    //         dispatch(fetchPosts())
+    //     }
+    // }, [postStatus, dispatch])
 
     let content
 
-    if (postStatus === 'loading') {
+    if (isLoading) {
         content = <Spinner text="Loading..." />
-    } else if (postStatus === `succeeded`) {
-        content = orderedPostIds.map(postId => (
-            <PostExcerpt key={postId} postId={postId} />
-        ))
-    } else if (postStatus === 'failed') {
-        content = <div>{error}</div>
+    } else if (isSuccess) {
+        content = posts.map(post => <PostExcerpt key={post.id} post={post} />)
+    } else if (isError) {
+        content = <div>{error.toString}</div>
     }    
 
     return (
