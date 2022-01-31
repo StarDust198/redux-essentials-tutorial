@@ -33,8 +33,7 @@ export const PostsList = () => {
         isFetching,
         isSuccess,
         isError,
-        error,
-        refetch
+        error
     } = useGetPostsQuery()
 
     const  sortedPosts = useMemo(() => {
@@ -64,7 +63,6 @@ export const PostsList = () => {
     return (
         <section className="posts-list">
             <h2>Posts</h2>
-            <button onClick={refetch}>Refetch Posts</button>
             {content}
         </section>
     )

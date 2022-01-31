@@ -22,13 +22,11 @@ export const SinglePostPage = ({match}) => {
     //         </section>
     //     )
     // }
-
     
     let content
     if (isFetching) {
         content = <Spinner text="Loading..." />
     } else if (isSuccess) {
-        console.log(post);
         content = (
             <article className="post">
                 <h2>{post.title}</h2>
