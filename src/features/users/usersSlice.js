@@ -1,26 +1,30 @@
 import { 
-    createSlice,  
     createEntityAdapter,
     createSelector
 } from '@reduxjs/toolkit'
 
-// import { client } from '../../api/client'
-
 import { apiSlice } from '../api/apiSlice'
+
+const usersAdapter = createEntityAdapter()
+
+const initialState = usersAdapter.getInitialState()
 
 export const extendedApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
         getUsers: builder.query({
-            query: () => '/users'
+            query: () => '/users',
+            // We can integrate createEntityAdapter into extendedApiSlice and use adapter
+            // to transform data before it's cached. It will return the standard { ids:[], 
+            // entities: {} } normalized data structure
+            transformResponse: responseData => {
+                return usersAdapter.setAll(initialState, responseData)
+            }
         })
     })
 })
 
 export const { useGetUsersQuery } = extendedApiSlice
 
-/* const usersAdapter = createEntityAdapter()
-
-const initialState = usersAdapter.getInitialState() */
 
 // Calling `someEndpoint.select(someArg)` generates a new selector that will return
 // the query result object for a query with those parameters.
@@ -28,20 +32,10 @@ const initialState = usersAdapter.getInitialState() */
 // In this case, the users query has no params, so we don't pass anything to select()
 export const selectUsersResult = extendedApiSlice.endpoints.getUsers.select()
 
-const emptyUsers = []
-
-export const selectAllUsers = createSelector(
+export const selectUsersData = createSelector(
     selectUsersResult,
-    usersResult => usersResult?.data ?? emptyUsers
+    usersResult => usersResult.data
 )
 
-export const selectUserById = createSelector(
-    selectAllUsers,
-    (state, userId) => userId,
-    (users, userId) => users.find(user => user.id === userId)
-)
-
-/* export const {
-    selectAll: selectAllUsers,
-    selectById: selectUserById
-} = usersAdapter.getSelectors(state => state.users) */
+export const { selectAll: selectAllUsers, selectById: selectUserById } =
+ usersAdapter.getSelectors(state => selectUsersData(state) ?? initialState)
